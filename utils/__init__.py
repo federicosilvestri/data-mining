@@ -1,6 +1,7 @@
 """Utils package"""
-from .dataset import download_dataset
+from .dataset import fetch_dataset, fetch_dataset_path
 
 __all__ = [
-    "download_dataset"
+    "fetch_dataset",
+    "fetch_dataset_path",
 ]

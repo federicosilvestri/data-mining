@@ -1,8 +1,10 @@
 """Utility functions to manage the dataset."""
 import logging as lg
+import typing
 from pathlib import Path
 from zipfile import ZipFile
 import gdown
+import pandas as pd
 
 # GDOWN URL
 DATASET_DOWNLOAD_URL = 'https://drive.google.com/uc?id=1Ii6X6AYzodwPB_DXL-nF2RT6LerTeyvV'
@@ -12,6 +14,11 @@ DATASET_DIR_NAME = 'dataset'
 
 # The files of dataset
 DATASET_FILES = ['tweets.csv', 'users.csv']
+
+# Google Drive shared Drive Name
+GOOGLE_DRIVE_SHARED_NAME = 'DM'
+
+GOOGLE_DRIVE_MOUNT_PATH = '/content/gdrive/'
 
 
 def _rmdir_recursive_(directory: Path) -> None:
@@ -74,12 +81,12 @@ def _dataset_already_downloaded_() -> bool:
     return exist
 
 
-def download_dataset(force_download=False) -> None:
+def _download_dataset_(force_download=False) -> typing.Dict[str, Path]:
     path: Path = _create_path_(delete=force_download)
 
     if _dataset_already_downloaded_() and not force_download:
         # dataset already exist!
-        return
+        return _make_dataset_(path)
 
     download_file_path = Path(path / 'dataset.zip').absolute()
 
@@ -98,4 +105,70 @@ def download_dataset(force_download=False) -> None:
     # deleting zip file
     download_file_path.unlink()
     lg.info("Dataset unzipped!")
-    # done!
+    return _make_dataset_(path)
+
+
+def _make_dataset_(dataset_path: Path) -> typing.Dict[str, Path]:
+    # dataset object
+    ds: dict[str, Path] = {}
+
+    for file_name in DATASET_FILES:
+        path: Path = dataset_path / file_name
+        ds[file_name] = path
+
+    return ds
+
+
+def _is_colab_running_() -> bool:
+    """
+    Check if script is running on Google Colab or locally.
+    Returns
+    -------
+    True if script is running on Colab, False if not.
+    """
+    try:
+        from google.colab import drive  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def _fetch_from_colab_() -> typing.Dict[str, Path]:
+    from google.colab import drive  # noqa: F401
+
+    # mounting the drive
+    drive.mount(GOOGLE_DRIVE_MOUNT_PATH)
+    # creating main path
+    main_path = Path(GOOGLE_DRIVE_MOUNT_PATH + f"Shareddrives/{GOOGLE_DRIVE_SHARED_NAME}/dataset/")
+
+    return _make_dataset_(main_path)
+
+
+def fetch_dataset_path() -> typing.Dict[str, Path]:
+    """
+    Fetch dataset. It builds the dictionary of str, Path.
+    Returns
+    -------
+    A dictionary of str, Path where str is the name of dataset and Path is the posix path of file.
+    """
+    if _is_colab_running_():
+        return _fetch_from_colab_()
+    else:
+        return _download_dataset_()
+
+
+def fetch_dataset() -> typing.Dict[str, pd.DataFrame]:
+    """
+    Fetch dataset. It builds the dictionary of str, pd.DataFrame.
+    Returns
+    -------
+    A dictionary of str, pd.DataFrame where str is the name of dataset and pd.DataFrame is the Pandas DataFrame object.
+    """
+    ds_path: typing.Dict[str, Path] = fetch_dataset_path()
+    ds: typing.Dict[str, pd.DataFrame] = {}
+
+    for name, path in ds_path.items():
+        lg.info(f"Pandas reading dataset {name}...")
+        ds[name] = pd.read_csv(path)
+
+    return ds
