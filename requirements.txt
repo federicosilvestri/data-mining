@@ -13,3 +13,4 @@ pytz==2022.4
 scipy==1.9.2
 six==1.16.0
 gdown==4.5.3
+langcodes==3.3.0
