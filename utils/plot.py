@@ -26,5 +26,8 @@ def build_grid_plot(configs):
             plt.xscale(config['xscale'])
         if 'yscale' in config:
             plt.yscale(config['yscale'])
+        if 'ylim_inf' in config and 'ylim_sup' in config:
+            plt.ylim(config['ylim_inf'], config['ylim_sup'])
+            
         
     plt.show()
