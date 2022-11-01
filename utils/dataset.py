@@ -172,3 +172,47 @@ def fetch_dataset() -> typing.Dict[str, pd.DataFrame]:
         ds[name] = pd.read_csv(path)
 
     return ds
+
+
+def store_preprocessed_dataset(step_name: str, file_name: str, df: pd.DataFrame) -> None:
+    """
+    Store a preprocessed dataset into a file.
+    Parameters
+    ----------
+    step_name The step of preprocess
+    file_name The name of file
+    df Dataframe to be saved
+
+    Returns
+    -------
+    None
+    """
+    path = Path(__file__).parent.parent.joinpath(DATASET_DIR_NAME).joinpath(step_name)
+
+    if not path.exists():
+        path.mkdir(parents=True)
+    file_path = path.joinpath(file_name)
+    df.to_csv(file_path)
+
+
+def fetch_preprocessed_dataset(step_name: str) -> typing.Dict[str, pd.DataFrame]:
+    """
+    Load all preprocessed datasets of specific step_name
+    Parameters
+    ----------
+    step_name the step name of preprocess
+
+    Returns
+    -------
+    A dictionary of str and Pandas DataFrame, where str is the name of dataset.
+    """
+    path = Path(__file__).parent.parent.joinpath(DATASET_DIR_NAME).joinpath(step_name)
+
+    ds: typing.Dict[str, pd.DataFrame] = {}
+    if not path.exists():
+        raise RuntimeError(f"The processed dataset {step_name} does not exists")
+    for element in path.iterdir():
+        if element.is_file() and element.suffix == '.csv':
+            df = pd.read_csv(element)
+            ds[element.name] = df
+    return ds
