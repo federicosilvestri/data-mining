@@ -15,3 +15,4 @@ six==1.16.0
 gdown==4.5.3
 langcodes==3.3.0
 pandarallel==1.6.3
+sklearn

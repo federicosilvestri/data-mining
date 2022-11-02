@@ -23,7 +23,7 @@ def check_positive_int(value):
     if not check_int(value):
         return False
 
-    return int(value) >= 0
+    return float(value) >= 0
 
 
 def check_text(value) -> bool:
