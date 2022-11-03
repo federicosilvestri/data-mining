@@ -192,7 +192,7 @@ def store_preprocessed_dataset(step_name: str, file_name: str, df: pd.DataFrame)
     if not path.exists():
         path.mkdir(parents=True)
     file_path = path.joinpath(file_name)
-    df.to_csv(file_path)
+    df.to_pickle(file_path)
 
 
 def fetch_preprocessed_dataset(step_name: str) -> typing.Dict[str, pd.DataFrame]:
@@ -212,7 +212,7 @@ def fetch_preprocessed_dataset(step_name: str) -> typing.Dict[str, pd.DataFrame]
     if not path.exists():
         raise RuntimeError(f"The processed dataset {step_name} does not exists")
     for element in path.iterdir():
-        if element.is_file() and element.suffix == '.csv':
-            df = pd.read_csv(element)
+        if element.is_file() and element.suffix == '.pickle':
+            df = pd.read_pickle(element)
             ds[element.name] = df
     return ds
