@@ -22,6 +22,16 @@ def build_grid_plot(configs):
                 plt.xticks(rotation=0)
         elif config['type'] == 'boxplot':
             config['df'].boxplot(column=config['columns'])
+        elif config['type'] == 'scatter':
+            columns = config['df'].columns
+            x_index = config['x_index']
+            y_index = config['y_index']
+            centers = config['centers']
+            plt.scatter(config['df'][columns[x_index]], config['df'][columns[y_index]], c=config['labels'], s=20)
+            plt.scatter(centers[:, x_index], centers[:, y_index], s=100, marker='*', c='r')
+            plt.xlabel(columns[x_index])
+            plt.ylabel(columns[y_index])
+
         if 'xscale' in config:
             plt.xscale(config['xscale'])
         if 'yscale' in config:
